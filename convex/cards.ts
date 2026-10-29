@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { validateAdminToken, assertAdminToken } from "./adminAuth";
 
@@ -65,7 +65,7 @@ export const getCards = query({
   },
 });
 
-// Seed automatique initial si la base est vide (codes initiaux sécurisés)
+// Seed automatique initial si la base est vide (avec codes CSPRNG 128-bit)
 export const seedInitialCards = mutation({
   args: {
     adminToken: v.optional(v.string()),
@@ -84,7 +84,7 @@ export const seedInitialCards = mutation({
 
     const initial = [
       {
-        code: "HXH-NUMERE-01",
+        code: generateSecureNenCode(),
         title: "Marais de Numere — Papillons de Brume",
         cardRank: "N" as const,
         points: 50,
@@ -96,7 +96,7 @@ export const seedInitialCards = mutation({
         createdAt: Date.now(),
       },
       {
-        code: "HXH-GOURMET-02",
+        code: generateSecureNenCode(),
         title: "Festin des Gourmets — Menchi & Buhara",
         cardRank: "R" as const,
         points: 80,
@@ -108,7 +108,7 @@ export const seedInitialCards = mutation({
         createdAt: Date.now(),
       },
       {
-        code: "HXH-TRICKTOWER-03",
+        code: generateSecureNenCode(),
         title: "Tour aux Astuces — Dalle Secrète 72h",
         cardRank: "SR" as const,
         points: 120,
@@ -120,7 +120,7 @@ export const seedInitialCards = mutation({
         createdAt: Date.now(),
       },
       {
-        code: "HXH-ZEVIL-04",
+        code: generateSecureNenCode(),
         title: "Île de Zevil — Plaque Cible #44",
         cardRank: "SR" as const,
         points: 150,
@@ -132,7 +132,7 @@ export const seedInitialCards = mutation({
         createdAt: Date.now(),
       },
       {
-        code: "HXH-NETERO-FINAL",
+        code: generateSecureNenCode(),
         title: "Défi Suprême — Sceau du Président Netero",
         cardRank: "SSR" as const,
         points: 250,
@@ -154,6 +154,30 @@ export const seedInitialCards = mutation({
     return all.map(c => ({ ...c, code: "🔒-NEN-CIPHER-PROTECTED" }));
   },
 });
+
+// 5. Régénération cryptographique haute sécurité de TOUS les codes de cartes
+// Remplace tous les codes par des tokens CSPRNG 128-bit indéchiffrables
+export const reCipherAllCardsInternal = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const cards = await ctx.db.query("cards").collect();
+    const updated = [];
+    for (const card of cards) {
+      const newCode = generateSecureNenCode();
+      await ctx.db.patch(card._id, {
+        code: newCode,
+        scannedBy: [],
+      });
+      updated.push({ id: card._id, title: card.title, code: newCode });
+    }
+    return {
+      success: true,
+      updatedCount: updated.length,
+      cards: updated,
+    };
+  },
+});
+
 
 // 2. Mise à jour sécurisée du quota de scans par l'Administrateur
 export const adminUpdateQuota = mutation({

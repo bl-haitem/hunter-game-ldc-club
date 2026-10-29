@@ -36,8 +36,6 @@ export const ScanView: React.FC<ScanViewProps> = ({
     message: string;
     hint?: string;
   } | null>(null);
-  const [showManual, setShowManual] = useState<boolean>(false);
-  const [manualCode, setManualCode] = useState<string>('');
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -233,72 +231,8 @@ export const ScanView: React.FC<ScanViewProps> = ({
         </div>
       </div>
 
-      {/* Option Saisie Manuelle de Secours (Garantit 100% d'accessibilité si caméra bloquée) */}
-      <div style={{ width: '100%', maxWidth: 340, marginTop: 4 }}>
-        {!showManual ? (
-          <button
-            type="button"
-            onClick={() => { sound.playClick(); setShowManual(true); }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--ash)',
-              fontSize: 9,
-              fontFamily: 'var(--font-code)',
-              letterSpacing: 1,
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              display: 'block',
-              width: '100%',
-              textAlign: 'center',
-              padding: '4px 0'
-            }}
-          >
-            ⌨ QR code difficile à scanner ? Saisie manuelle
-          </button>
-        ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!manualCode.trim()) return;
-              handleScanCode(manualCode.trim());
-              setManualCode('');
-            }}
-            style={{
-              display: 'flex',
-              gap: 6,
-              background: 'rgba(5, 12, 22, 0.85)',
-              padding: '8px 10px',
-              borderRadius: 6,
-              border: '1px solid rgba(0, 240, 118, 0.3)'
-            }}
-          >
-            <input
-              type="text"
-              value={manualCode}
-              onChange={(e) => setManualCode(e.target.value)}
-              placeholder="Code carte (ex: HXH-NUMERE-01)..."
-              className="field-input"
-              style={{ fontSize: 10, padding: '6px 8px', flex: 1, textTransform: 'uppercase' }}
-              autoFocus
-            />
-            <button type="submit" className="btn btn-green btn-xs" style={{ padding: '6px 12px', fontSize: 10 }}>
-              VALIDER
-            </button>
-            <button
-              type="button"
-              onClick={() => { sound.playClick(); setShowManual(false); }}
-              className="btn btn-outline btn-xs"
-              style={{ padding: '6px 8px', fontSize: 10 }}
-            >
-              ✕
-            </button>
-          </form>
-        )}
-      </div>
-
       {/* LDC Club Creator Signature */}
-      <div className="ldc-footer-credit" style={{ width: '100%', maxWidth: 340, flexShrink: 0 }}>
+      <div className="ldc-footer-credit" style={{ width: '100%', maxWidth: 340, flexShrink: 0, marginTop: 10 }}>
         <span className="dot">✦</span> JEU CRÉÉ PAR LE CLUB LDC <span>•</span> MADE BY LDC CLUB <span className="dot">✦</span>
       </div>
 
