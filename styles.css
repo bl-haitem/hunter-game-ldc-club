@@ -1,0 +1,886 @@
+/* ==========================================================================
+   HUNTER × HUNTER : EXAMEN HUNTER & GREED ISLAND
+   AAA MOBILE ANIME GAME HUD & UI/UX SYSTEM
+   ========================================================================== */
+
+:root {
+  --game-bg-deep: #05060a;
+  --game-bg-panel: #0d101a;
+  --game-bg-card: #131726;
+  --game-bg-glass: rgba(15, 19, 32, 0.88);
+  
+  --game-border-glass: rgba(255, 255, 255, 0.12);
+  --game-border-gold: #ffd700;
+  --game-border-neon: #00ff88;
+
+  /* Canonical Nen Spectrum */
+  --nen-green: #00ff88;
+  --nen-green-glow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 255, 136, 0.2);
+  --nen-cyan: #00e5ff;
+  --nen-cyan-glow: 0 0 20px rgba(0, 229, 255, 0.5), 0 0 40px rgba(0, 229, 255, 0.2);
+  --nen-purple: #bd00ff;
+  --nen-purple-glow: 0 0 20px rgba(189, 0, 255, 0.5), 0 0 40px rgba(189, 0, 255, 0.2);
+  --nen-gold: #ffd700;
+  --nen-gold-glow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 45px rgba(255, 215, 0, 0.2);
+  --nen-red: #ff2a55;
+
+  --text-white: #ffffff;
+  --text-muted: #94a3b8;
+  --text-dark: #64748b;
+
+  --font-game: 'Outfit', 'Rajdhani', -apple-system, sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  background-color: var(--game-bg-deep);
+  color: var(--text-white);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  line-height: 1.4;
+  overflow-x: hidden;
+  padding-bottom: 92px; /* For mobile game dock */
+}
+
+/* Background Cyber Grid with Nen Wave Particles */
+.game-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 10% 15%, rgba(0, 255, 136, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(189, 0, 255, 0.09) 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(255, 215, 0, 0.06) 0%, transparent 55%),
+    linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+}
+
+.game-viewport {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 12px 14px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   GAME TOP HUD (PLAYER LEVEL, NEN GAUGE, CRYSTAL POINTS)
+   ========================================================================== */
+.game-top-hud {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(8, 10, 16, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1.5px solid rgba(0, 255, 136, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(0, 255, 136, 0.15);
+  padding: 10px 14px;
+}
+
+.hud-wrapper {
+  max-width: 620px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-player-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.hud-avatar-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid var(--nen-green);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--nen-green-glow);
+  background: #000;
+  flex-shrink: 0;
+}
+
+.hud-avatar-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.hud-rank-tag {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.85);
+  font-size: 7.5px;
+  font-weight: 900;
+  text-align: center;
+  color: var(--nen-green);
+  font-family: var(--font-code);
+  letter-spacing: 0.5px;
+}
+
+.hud-meta-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud-candidate-name {
+  font-size: 14px;
+  font-weight: 900;
+  font-family: var(--font-game);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.3px;
+}
+
+.hud-nen-aura-bar-outer {
+  width: 110px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  position: relative;
+}
+
+.hud-nen-aura-bar-fill {
+  width: 85%;
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #00e5ff);
+  border-radius: 9999px;
+  box-shadow: 0 0 8px var(--nen-green);
+}
+
+.hud-right-currencies {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crystal-score-box {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(15, 18, 30, 0.8) 100%);
+  border: 1.5px solid var(--nen-gold);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 900;
+  font-family: var(--font-code);
+  color: var(--nen-gold);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.hud-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hud-icon-btn.active {
+  border-color: var(--nen-green);
+  color: var(--nen-green);
+  box-shadow: var(--nen-green-glow);
+  background: rgba(0, 255, 136, 0.15);
+}
+
+/* ==========================================================================
+   HUNTER LICENSE 3D GAME CARD
+   ========================================================================== */
+.card-perspective-container {
+  perspective: 1200px;
+  margin: 8px auto 18px;
+  width: 100%;
+}
+
+.hunter-license-collectible {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #131728 0%, #080911 100%);
+  border: 2px solid var(--nen-green);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), var(--nen-green-glow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s;
+  transform-style: preserve-3d;
+}
+
+.holo-sweep-layer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 15%,
+    rgba(255, 255, 255, 0.08) 30%,
+    rgba(0, 255, 136, 0.2) 45%,
+    rgba(0, 229, 255, 0.25) 50%,
+    rgba(189, 0, 255, 0.2) 55%,
+    rgba(255, 215, 0, 0.2) 60%,
+    transparent 80%
+  );
+  background-size: 250% 250%;
+  pointer-events: none;
+  animation: holoSweep 5s ease infinite alternate;
+}
+
+@keyframes holoSweep {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+.license-stripe-dual {
+  height: 18px;
+  background: linear-gradient(90deg, #0284c7 0%, #06b6d4 50%, #3b82f6 100%);
+  position: relative;
+}
+
+.license-stripe-sub-glow {
+  height: 4px;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  opacity: 0.8;
+}
+
+.license-layout-front {
+  padding: 16px 18px 18px;
+}
+
+.license-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.hxh-association-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hxh-association-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #000;
+  border: 1.5px solid var(--nen-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-game);
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--nen-green);
+  box-shadow: 0 0 12px rgba(0,255,136,0.3);
+}
+
+.hxh-association-logo span {
+  color: var(--nen-gold);
+}
+
+.association-titles h3 {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.association-titles h2 {
+  font-size: 13px;
+  font-family: var(--font-game);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.6px;
+}
+
+.gold-microchip-game {
+  width: 44px;
+  height: 32px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #fde047 0%, #b45309 100%);
+  border: 1px solid #fef08a;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.7), 0 2px 8px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.gold-microchip-game .chip-wire {
+  height: 1px;
+  background: rgba(120, 53, 15, 0.7);
+  width: 100%;
+}
+
+.license-core-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.candidate-portrait-box {
+  width: 86px;
+  height: 86px;
+  border-radius: 14px;
+  border: 2.5px solid var(--nen-green);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--nen-green-glow);
+  flex-shrink: 0;
+  background: #000;
+}
+
+.candidate-portrait-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.nen-ribbon-tag {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.88);
+  color: var(--nen-green);
+  font-size: 8px;
+  font-weight: 900;
+  text-align: center;
+  padding: 1.5px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.candidate-credentials {
+  flex: 1;
+  min-width: 0;
+}
+
+.candidate-display-name {
+  font-size: 22px;
+  font-weight: 900;
+  font-family: var(--font-game);
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.candidate-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.serial-code-pill {
+  font-size: 10px;
+  font-family: var(--font-code);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 5px;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+}
+
+.nen-affinity-pill {
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 9px;
+  border-radius: 5px;
+  border: 1px solid var(--nen-green);
+  color: var(--nen-green);
+  background: rgba(0, 255, 136, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rank-display-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.rank-display-stars {
+  color: var(--nen-gold);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.license-footer-metrics {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metric-cell .metric-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.metric-cell .metric-val {
+  font-size: 18px;
+  font-weight: 900;
+  font-family: var(--font-game);
+  color: var(--nen-green);
+}
+
+.metric-cell .metric-val.gold {
+  color: var(--nen-gold);
+}
+
+.touch-flip-instruction {
+  font-size: 9.5px;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 5px 10px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* VERSO OF CARD */
+.license-layout-back {
+  padding: 18px 20px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.magnetic-encoded-tape {
+  height: 40px;
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin: -18px -20px 14px -20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 18px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--nen-green);
+  letter-spacing: 1.2px;
+}
+
+/* ==========================================================================
+   GREED ISLAND BINDER (HERO GRIMOIRE & CARDS)
+   ========================================================================== */
+.greed-binder-banner {
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 2px solid var(--nen-gold);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), var(--nen-gold-glow);
+}
+
+.greed-binder-banner img {
+  width: 100%;
+  height: 185px;
+  object-fit: cover;
+  filter: brightness(0.68) contrast(1.15);
+  transition: transform 0.4s ease;
+}
+
+.greed-binder-banner:hover img {
+  transform: scale(1.02);
+}
+
+.binder-overlay-content {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 6, 10, 0.3) 0%, rgba(5, 6, 10, 0.96) 100%);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.binder-top-pills {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.binder-gold-tag {
+  background: rgba(255, 215, 0, 0.2);
+  border: 1px solid var(--nen-gold);
+  color: var(--nen-gold);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+/* Card Slot Grid */
+.card-slots-collection {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .card-slots-collection {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.greed-card-slot {
+  background: var(--game-bg-card);
+  border: 1.5px solid var(--game-border-glass);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.greed-card-slot:hover {
+  transform: translateY(-3px);
+  border-color: var(--nen-gold);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+}
+
+.greed-card-slot.acquired {
+  border-color: rgba(0, 255, 136, 0.5);
+  box-shadow: 0 4px 18px rgba(0, 255, 136, 0.15);
+}
+
+.slot-card-image-header {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  background: #000;
+}
+
+.slot-card-image-header img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.greed-card-slot:hover .slot-card-image-header img {
+  transform: scale(1.05);
+}
+
+.slot-card-image-header .slot-badge-number {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.8);
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.slot-card-image-header .slot-badge-rarity {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.rarity-SSR { background: linear-gradient(90deg, #ffd700, #f59e0b); color: #000; box-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.rarity-SR  { background: linear-gradient(90deg, #c084fc, #9333ea); color: #fff; box-shadow: 0 0 10px rgba(189,0,255,0.4); }
+.rarity-R   { background: linear-gradient(90deg, #38bdf8, #0284c7); color: #000; }
+.rarity-N   { background: linear-gradient(90deg, #34d399, #059669); color: #000; }
+
+.slot-card-body {
+  padding: 12px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.slot-stage-title {
+  font-size: 14px;
+  font-weight: 900;
+  font-family: var(--font-game);
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.slot-hint-snippet {
+  font-size: 11px;
+  color: #cbd5e1;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.slot-card-footer {
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   TOURNAMENT LEADERBOARD PODIUM
+   ========================================================================== */
+.tournament-podium-zone {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 24px 4px 10px;
+}
+
+.podium-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.podium-character-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  border: 2px solid var(--nen-cyan);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  background: #000;
+}
+
+.podium-character-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.podium-box.rank-1 .podium-character-avatar {
+  width: 82px;
+  height: 82px;
+  border: 3px solid var(--nen-gold);
+  box-shadow: var(--nen-gold-glow);
+}
+
+.podium-box.rank-2 .podium-character-avatar {
+  border: 2.5px solid var(--nen-cyan);
+  box-shadow: var(--nen-cyan-glow);
+}
+
+.podium-box.rank-3 .podium-character-avatar {
+  border: 2.5px solid #cd7f32;
+}
+
+.podium-pedestal {
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-game);
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.podium-box.rank-1 .podium-pedestal {
+  height: 96px;
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0.05) 100%);
+  border-top: 3px solid var(--nen-gold);
+  color: var(--nen-gold);
+}
+
+.podium-box.rank-2 .podium-pedestal {
+  height: 68px;
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.3) 0%, rgba(0, 229, 255, 0.05) 100%);
+  border-top: 3px solid var(--nen-cyan);
+  color: var(--nen-cyan);
+}
+
+.podium-box.rank-3 .podium-pedestal {
+  height: 46px;
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.3) 0%, rgba(205, 127, 50, 0.05) 100%);
+  border-top: 3px solid #cd7f32;
+  color: #cd7f32;
+}
+
+.candidate-row-card {
+  background: var(--game-bg-card);
+  border: 1px solid var(--game-border-glass);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.candidate-row-card.is-active-user {
+  background: rgba(0, 255, 136, 0.08);
+  border-color: var(--nen-green);
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.2);
+}
+
+/* ==========================================================================
+   MOBILE GAME CONTROLLER DOCK
+   ========================================================================== */
+.game-controller-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 74px;
+  background: rgba(6, 8, 14, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1.5px solid rgba(0, 255, 136, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  z-index: 50;
+  max-width: 620px;
+  margin: 0 auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.game-dock-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 8px 0;
+  transition: all 0.2s;
+}
+
+.game-dock-tab.active {
+  color: var(--nen-green);
+}
+
+.game-dock-tab i {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.2s;
+}
+
+.game-dock-tab.active i {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px var(--nen-green));
+}
+
+/* Tactical Action Buttons */
+.btn-game-tactical {
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: var(--game-bg-card);
+  border: 1px solid var(--game-border-glass);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-game);
+  letter-spacing: 0.5px;
+}
+
+.btn-game-tactical:hover {
+  border-color: var(--nen-green);
+  background: rgba(0, 255, 136, 0.08);
+}
+
+.btn-game-tactical:active {
+  transform: scale(0.97);
+}
+
+.btn-game-tactical.primary {
+  background: var(--nen-green);
+  color: #000;
+  font-weight: 900;
+  border: none;
+  box-shadow: 0 4px 18px rgba(0, 255, 136, 0.4);
+}
+
+.btn-game-tactical.primary:hover {
+  background: #00e57a;
+}
