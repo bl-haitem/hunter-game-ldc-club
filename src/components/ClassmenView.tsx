@@ -21,10 +21,10 @@ export const ClassmenView: React.FC<ClassmenViewProps> = ({
   const myRankIdx = sortedPlayers.findIndex(p => p.id === player.id);
   const myRank = myRankIdx >= 0 ? myRankIdx + 1 : 1;
 
-  // Top 3 Podium
-  const top1 = sortedPlayers[0] || { nickname: 'killua.zoldyck', score: 350, hunterNumber: 'HXH-099' };
-  const top2 = sortedPlayers[1] || { nickname: 'kurapika.kurta', score: 230, hunterNumber: 'HXH-404' };
-  const top3 = sortedPlayers[2] || { nickname: player.nickname || 'Hunter', score: player.score, hunterNumber: player.hunterNumber };
+  // Top 3 Podium (Affichage uniquement des vrais candidats classés, pas de duplication)
+  const top1 = sortedPlayers[0] || null;
+  const top2 = sortedPlayers[1] || null;
+  const top3 = sortedPlayers[2] || null;
   const restPlayers = sortedPlayers.slice(3);
 
   return (
@@ -61,11 +61,11 @@ export const ClassmenView: React.FC<ClassmenViewProps> = ({
             {/* 2nd Place (Left) — Silver / Cyan */}
             <div className="podium-stand-col">
               <div className="podium-crown">🥈</div>
-              <div className="podium-name" style={{ color: 'var(--hunter-cyan)' }}>
-                {top2.nickname}
+              <div className="podium-name" style={{ color: top2 ? 'var(--hunter-cyan)' : 'var(--ash)', fontSize: top2 ? 11 : 9 }}>
+                {top2 ? top2.nickname : '— En attente —'}
               </div>
-              <div className="podium-score" style={{ color: 'var(--hunter-cyan)' }}>
-                {top2.score} PTS
+              <div className="podium-score" style={{ color: top2 ? 'var(--hunter-cyan)' : 'var(--ash)' }}>
+                {top2 ? `${top2.score} PTS` : '—'}
               </div>
               <div className="podium-pedestal pedestal-2">
                 <span className="pedestal-rank-num">2</span>
@@ -75,11 +75,11 @@ export const ClassmenView: React.FC<ClassmenViewProps> = ({
             {/* 1st Place (Center) — Gold Greed Island */}
             <div className="podium-stand-col">
               <div className="podium-crown">👑</div>
-              <div className="podium-name" style={{ color: 'var(--hunter-gold)', fontSize: 12, fontWeight: 900 }}>
-                {top1.nickname}
+              <div className="podium-name" style={{ color: top1 ? 'var(--hunter-gold)' : 'var(--ash)', fontSize: 12, fontWeight: 900 }}>
+                {top1 ? top1.nickname : '— En attente —'}
               </div>
-              <div className="podium-score" style={{ color: 'var(--hunter-gold)', fontSize: 13 }}>
-                {top1.score} PTS
+              <div className="podium-score" style={{ color: top1 ? 'var(--hunter-gold)' : 'var(--ash)', fontSize: 13 }}>
+                {top1 ? `${top1.score} PTS` : '—'}
               </div>
               <div className="podium-pedestal pedestal-1">
                 <span className="pedestal-rank-num">1</span>
@@ -89,11 +89,11 @@ export const ClassmenView: React.FC<ClassmenViewProps> = ({
             {/* 3rd Place (Right) — Bronze / Emerald */}
             <div className="podium-stand-col">
               <div className="podium-crown">🥉</div>
-              <div className="podium-name" style={{ color: 'var(--hunter-green)' }}>
-                {top3.nickname}
+              <div className="podium-name" style={{ color: top3 ? 'var(--hunter-green)' : 'var(--ash)', fontSize: top3 ? 11 : 9 }}>
+                {top3 ? top3.nickname : '— En attente —'}
               </div>
-              <div className="podium-score" style={{ color: 'var(--hunter-green)' }}>
-                {top3.score} PTS
+              <div className="podium-score" style={{ color: top3 ? 'var(--hunter-green)' : 'var(--ash)' }}>
+                {top3 ? `${top3.score} PTS` : '—'}
               </div>
               <div className="podium-pedestal pedestal-3">
                 <span className="pedestal-rank-num">3</span>
