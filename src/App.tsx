@@ -45,27 +45,26 @@ export const App: React.FC = () => {
 
   // 3. All Players State (Candidates list & Leaderboard)
   const [allPlayers, setAllPlayers] = useState<Player[]>(() => {
-    let list: Player[] = [];
     try {
       const saved = localStorage.getItem('hxh_all_players');
-      if (saved) list = JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
     } catch {}
-    if (!Array.isArray(list) || list.length < 3) {
-      list = [...INITIAL_RIVALS];
-    }
-    return list;
+    return [];
   });
 
   // 4. Scans Feed State
   const [scans, setScans] = useState<ScanLog[]>(() => {
     try {
       const saved = localStorage.getItem('hxh_scans');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
     } catch {}
-    return [
-      { id: 's1', time: '14:22', hunterName: 'killua.zoldyck', hunterId: 'HXH-099', cardTitle: 'Marais de Numere', points: 50 },
-      { id: 's2', time: '14:35', hunterName: 'kurapika.kurta', hunterId: 'HXH-404', cardTitle: 'Festin des Gourmets', points: 80 }
-    ];
+    return [];
   });
 
   // 5. Navigation & Modal States

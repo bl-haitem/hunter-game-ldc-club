@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { validateAdminToken, assertAdminToken } from "./adminAuth";
 
@@ -286,6 +286,38 @@ export const adminResetAllPlayers = mutation({
       success: true,
       deletedCount: players.length,
       message: `Base de données réinitialisée : ${players.length} candidat(s) supprimé(s).`,
+    };
+  },
+});
+
+// 8. Purge interne sécurisée (accessible UNIQUEMENT depuis la CLI du serveur, jamais depuis le client web)
+export const purgeAllRecordsInternal = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Supprimer tous les joueurs
+    const players = await ctx.db.query("players").collect();
+    for (const player of players) {
+      await ctx.db.delete(player._id);
+    }
+
+    // 2. Réinitialiser la liste scannedBy sur toutes les cartes
+    const cards = await ctx.db.query("cards").collect();
+    for (const card of cards) {
+      await ctx.db.patch(card._id, {
+        scannedBy: [],
+      });
+    }
+
+    // 3. Purger l'historique des scans
+    const scans = await ctx.db.query("scans").collect();
+    for (const scan of scans) {
+      await ctx.db.delete(scan._id);
+    }
+
+    return {
+      success: true,
+      deletedPlayers: players.length,
+      deletedScans: scans.length,
     };
   },
 });

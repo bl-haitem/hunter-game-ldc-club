@@ -221,7 +221,7 @@ export class ConvexDatabaseService {
         const cloudPlayers: any = await this.client.query(api.players.getAllPlayers, {
           adminToken
         } as any);
-        if (Array.isArray(cloudPlayers) && cloudPlayers.length > 0) {
+        if (Array.isArray(cloudPlayers)) {
           const mapped: Player[] = cloudPlayers.map((p: any) => ({
             id: p._id,
             email: p.email || '',
@@ -245,13 +245,11 @@ export class ConvexDatabaseService {
       const saved = localStorage.getItem('hxh_all_players');
       if (saved) {
         const list: Player[] = JSON.parse(saved);
-        if (Array.isArray(list) && list.length > 0) return list;
+        if (Array.isArray(list)) return list;
       }
     } catch {}
 
-    const defaults = [...INITIAL_RIVALS];
-    localStorage.setItem('hxh_all_players', JSON.stringify(defaults));
-    return defaults;
+    return [];
   }
 
   // --- ADMIN: UPDATE CANDIDATE POINTS (SECURE BACKEND MUTATION) ---
@@ -521,7 +519,7 @@ export class ConvexDatabaseService {
     if (this.client) {
       try {
         const cloudScans: any = await this.client.query(api.scans.getLiveScans);
-        if (Array.isArray(cloudScans) && cloudScans.length > 0) {
+        if (Array.isArray(cloudScans)) {
           const mapped: ScanLog[] = cloudScans.map((s: any) => ({
             id: s._id,
             time: s.timeStr,
@@ -546,10 +544,7 @@ export class ConvexDatabaseService {
       }
     } catch {}
 
-    return [
-      { id: 's1', time: '14:22', hunterName: 'killua.zoldyck', hunterId: 'HXH-099', cardTitle: 'Marais de Numere', points: 50 },
-      { id: 's2', time: '14:35', hunterName: 'kurapika.kurta', hunterId: 'HXH-404', cardTitle: 'Festin des Gourmets', points: 80 }
-    ];
+    return [];
   }
 
   public async claimScan(
