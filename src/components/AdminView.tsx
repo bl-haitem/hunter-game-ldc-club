@@ -10,6 +10,8 @@ interface AdminViewProps {
   allPlayers: Player[];
   scans: ScanLog[];
   onUpdatePlayerPoints: (playerId: string, newPoints: number) => Promise<void>;
+  onDeletePlayer?: (playerId: string) => Promise<void>;
+  onResetAllPlayers?: () => Promise<void>;
   onUpdateCardQuota: (cardId: string, newQuota: number) => Promise<void>;
   onAddCard: (card: Omit<Card, 'id' | 'scannedBy'>) => Promise<void>;
   onDeleteCard: (cardId: string) => Promise<void>;
@@ -25,6 +27,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   allPlayers,
   scans,
   onUpdatePlayerPoints,
+  onDeletePlayer,
+  onResetAllPlayers,
   onUpdateCardQuota,
   onAddCard,
   onDeleteCard,
@@ -208,6 +212,41 @@ export const AdminView: React.FC<AdminViewProps> = ({
       sound.playError();
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleDeletePlayerClick = async (playerId: string, nickname: string) => {
+    if (!onDeletePlayer) return;
+    if (!window.confirm(`Voulez-vous supprimer DÉFINITIVEMENT le candidat "${nickname}" de la base de données ?`)) {
+      return;
+    }
+    try {
+      await onDeletePlayer(playerId);
+      sound.playClick();
+      showToast(`Candidat "${nickname}" supprimé définitivement.`);
+      await refreshAdminCards();
+    } catch (err: any) {
+      alert(err?.message || 'Erreur lors de la suppression');
+      sound.playError();
+    }
+  };
+
+  const handleResetAllClick = async () => {
+    if (!onResetAllPlayers) return;
+    const confirmPrompt = window.prompt(
+      "ALERTE ROUGE : Cette action supprimera DÉFINITIVEMENT tous les candidats de la base de données Convex et réinitialisera les quotas de scans.\n\nPour confirmer, tapez 'SUPPRIMER' ci-dessous :"
+    );
+    if (confirmPrompt !== 'SUPPRIMER') {
+      return;
+    }
+    try {
+      await onResetAllPlayers();
+      sound.playSuccess();
+      showToast("Tous les candidats ont été purgés de la base de données !");
+      await refreshAdminCards();
+    } catch (err: any) {
+      alert(err?.message || 'Erreur lors de la réinitialisation');
+      sound.playError();
     }
   };
 
@@ -605,13 +644,28 @@ export const AdminView: React.FC<AdminViewProps> = ({
       {/* TAB 1: CANDIDATES LIST & POINTS CONTROL (CORE USER REQUIREMENT) */}
       {adminTab === 'candidates' && (
         <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--hunter-green)' }}>
-              ★ LISTE DES JOUEURS & CONTRÔLE DES POINTS
+              ★ LISTE DES CANDIDATS ({allPlayers.length})
             </div>
-            <span style={{ fontFamily: 'var(--font-code)', fontSize: 9, color: 'var(--hunter-cyan)' }}>
-              Convex Live
-            </span>
+            {onResetAllPlayers && allPlayers.length > 0 && (
+              <button
+                type="button"
+                onClick={handleResetAllClick}
+                className="btn btn-outline btn-xs"
+                style={{
+                  color: 'var(--hunter-danger)',
+                  borderColor: 'rgba(255, 68, 68, 0.45)',
+                  background: 'rgba(255, 68, 68, 0.12)',
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  padding: '4px 8px'
+                }}
+              >
+                ⚠ SUPPRIMER TOUS LES CANDIDATS
+              </button>
+            )}
           </div>
 
           {/* Search Box */}
@@ -657,7 +711,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         {p.email || 'Email non renseigné'} · {p.scannedCodeIds.length} cartes validées
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
+                    <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span
                         style={{
                           fontSize: 9,
@@ -671,6 +725,24 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       >
                         {rank.title}
                       </span>
+                      {onDeletePlayer && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePlayerClick(p.id, p.nickname)}
+                          title="Supprimer définitivement ce candidat"
+                          style={{
+                            background: 'rgba(255, 68, 68, 0.12)',
+                            border: '1px solid rgba(255, 68, 68, 0.35)',
+                            color: 'var(--hunter-danger)',
+                            padding: '2px 6px',
+                            borderRadius: 3,
+                            fontSize: 10,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      )}
                     </div>
                   </div>
 

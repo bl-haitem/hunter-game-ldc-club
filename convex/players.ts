@@ -210,3 +210,83 @@ export const adminUpdatePlayerPoints = mutation({
     };
   },
 });
+
+// 6. Suppression sécurisée d'un candidat spécifique par l'Administrateur
+export const adminDeletePlayer = mutation({
+  args: {
+    adminToken: v.string(),
+    playerId: v.id("players"),
+  },
+  handler: async (ctx, args) => {
+    await assertAdminToken(ctx, args.adminToken);
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) {
+      throw new Error("Candidat introuvable dans la base de données !");
+    }
+
+    // Retirer le joueur des cartes qu'il a scannées
+    const cards = await ctx.db.query("cards").collect();
+    for (const card of cards) {
+      if (card.scannedBy.includes(player._id)) {
+        await ctx.db.patch(card._id, {
+          scannedBy: card.scannedBy.filter((id) => id !== player._id),
+        });
+      }
+    }
+
+    // Supprimer ses scans associés
+    const scans = await ctx.db
+      .query("scans")
+      .withIndex("by_player", (q) => q.eq("playerId", player._id))
+      .collect();
+    for (const scan of scans) {
+      await ctx.db.delete(scan._id);
+    }
+
+    // Supprimer le joueur
+    await ctx.db.delete(args.playerId);
+
+    return {
+      success: true,
+      message: `Candidat ${player.nickname} supprimé définitivement.`,
+    };
+  },
+});
+
+// 7. Réinitialisation et suppression définitive de TOUS les candidats par l'Administrateur
+export const adminResetAllPlayers = mutation({
+  args: {
+    adminToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await assertAdminToken(ctx, args.adminToken);
+
+    // 1. Supprimer tous les joueurs
+    const players = await ctx.db.query("players").collect();
+    for (const player of players) {
+      await ctx.db.delete(player._id);
+    }
+
+    // 2. Réinitialiser la liste scannedBy sur toutes les cartes
+    const cards = await ctx.db.query("cards").collect();
+    for (const card of cards) {
+      await ctx.db.patch(card._id, {
+        scannedBy: [],
+      });
+    }
+
+    // 3. Purger l'historique des scans
+    const scans = await ctx.db.query("scans").collect();
+    for (const scan of scans) {
+      await ctx.db.delete(scan._id);
+    }
+
+    return {
+      success: true,
+      deletedCount: players.length,
+      message: `Base de données réinitialisée : ${players.length} candidat(s) supprimé(s).`,
+    };
+  },
+});
+

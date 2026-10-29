@@ -165,6 +165,18 @@ export const App: React.FC = () => {
     await syncDatabase();
   };
 
+  // Admin Mutation: Delete Candidate (Protected by secure session token)
+  const handleAdminDeletePlayer = async (playerId: string) => {
+    await convexDb.adminDeletePlayer(playerId);
+    await syncDatabase();
+  };
+
+  // Admin Mutation: Reset All Candidates (Protected by secure session token)
+  const handleAdminResetAllPlayers = async () => {
+    await convexDb.adminResetAllPlayers();
+    await syncDatabase();
+  };
+
   const handleStartExam = () => {
     if (!player.email) {
       setIsAuthModalOpen(true);
@@ -261,6 +273,8 @@ export const App: React.FC = () => {
                 allPlayers={allPlayers}
                 scans={scans}
                 onUpdatePlayerPoints={handleAdminUpdatePlayerPoints}
+                onDeletePlayer={handleAdminDeletePlayer}
+                onResetAllPlayers={handleAdminResetAllPlayers}
                 onUpdateCardQuota={handleAdminUpdateCardQuota}
                 onAddCard={handleAdminAddCard}
                 onDeleteCard={handleAdminDeleteCard}

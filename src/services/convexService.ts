@@ -301,6 +301,72 @@ export class ConvexDatabaseService {
     return { success: true, newScore: newPoints, rank: rank.title };
   }
 
+  // --- ADMIN: DELETE SPECIFIC CANDIDATE ---
+  public async adminDeletePlayer(playerId: string): Promise<boolean> {
+    if (!this.adminSessionToken) {
+      throw new Error('ACCÈS REFUSÉ : Session administrateur non active !');
+    }
+
+    if (this.client && !playerId.startsWith('hunter_') && !playerId.startsWith('rival-')) {
+      try {
+        await this.client.mutation(api.players.adminDeletePlayer, {
+          adminToken: this.adminSessionToken,
+          playerId: playerId as any
+        } as any);
+      } catch (err) {
+        console.warn('[Convex] Erreur adminDeletePlayer cloud :', err);
+      }
+    }
+
+    const all = await this.getAllPlayers();
+    const filtered = all.filter(p => p.id !== playerId);
+    localStorage.setItem('hxh_all_players', JSON.stringify(filtered));
+
+    try {
+      const active = localStorage.getItem('hxh_player');
+      if (active) {
+        const p: Player = JSON.parse(active);
+        if (p.id === playerId) {
+          localStorage.removeItem('hxh_player');
+        }
+      }
+    } catch {}
+
+    return true;
+  }
+
+  // --- ADMIN: RESET & PURGE ALL CANDIDATES ---
+  public async adminResetAllPlayers(): Promise<{ success: boolean; deletedCount: number; message: string }> {
+    if (!this.adminSessionToken) {
+      throw new Error('ACCÈS REFUSÉ : Session administrateur non active !');
+    }
+
+    let deletedCount = 0;
+    if (this.client) {
+      try {
+        const res: any = await this.client.mutation(api.players.adminResetAllPlayers, {
+          adminToken: this.adminSessionToken
+        } as any);
+        if (res) {
+          deletedCount = res.deletedCount || 0;
+        }
+      } catch (err) {
+        console.warn('[Convex] Erreur adminResetAllPlayers cloud :', err);
+      }
+    }
+
+    // Réinitialiser le cache local
+    localStorage.removeItem('hxh_all_players');
+    localStorage.removeItem('hxh_scans');
+    localStorage.removeItem('hxh_player');
+
+    return {
+      success: true,
+      deletedCount,
+      message: `Tous les candidats ont été définitivement supprimés (${deletedCount}).`
+    };
+  }
+
   // --- CARDS & QUOTAS ---
   // --- CARDS & QUOTAS (PROTECTION ZERO-KNOWLEDGE) ---
   public async getCards(playerId?: string): Promise<Card[]> {
