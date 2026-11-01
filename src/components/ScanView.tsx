@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, Player } from '../types/hxh';
 import { sound } from '../services/sound';
+import jsQR from 'jsqr';
 
 interface ScanViewProps {
   player: Player;
@@ -85,9 +86,9 @@ export const ScanView: React.FC<ScanViewProps> = ({
       }
       setCamStatus('GYO ACTIVÉ');
 
-      // Scan loop using canvas & jsQR if available, or BarcodeDetector
+      // Scan loop using canvas & bundled jsQR or native BarcodeDetector
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
       scanIntervalRef.current = setInterval(async () => {
         if (!videoRef.current || videoRef.current.readyState < videoRef.current.HAVE_ENOUGH_DATA) return;
@@ -109,18 +110,19 @@ export const ScanView: React.FC<ScanViewProps> = ({
           } catch {}
         }
 
-        // 2. Try jsQR if loaded via window
-        if ((window as any).jsQR) {
-          try {
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const decoded = (window as any).jsQR(imgData.data, imgData.width, imgData.height, {
+        // 2. Use reliable bundled jsQR decoder
+        try {
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const qrDecoder = jsQR || (window as any).jsQR;
+          if (qrDecoder) {
+            const decoded = qrDecoder(imgData.data, imgData.width, imgData.height, {
               inversionAttempts: 'attemptBoth'
             });
             if (decoded?.data) {
               handleScanCode(decoded.data);
             }
-          } catch {}
-        }
+          }
+        } catch {}
       }, 250);
 
     } catch (e) {

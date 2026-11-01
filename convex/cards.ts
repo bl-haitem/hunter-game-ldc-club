@@ -40,12 +40,23 @@ export const getCards = query({
 
     // 2. Joueur / Candidat : Récupérer ses cartes déjà scannées
     let playerScannedCodes: string[] = [];
-    if (args.playerId) {
-      const player = await ctx.db
+    let candidatePlayerId: string | undefined = args.playerId;
+
+    if (candidatePlayerId) {
+      let player = await ctx.db
         .query("players")
-        .filter((q) => q.eq(q.field("_id"), args.playerId))
+        .filter((q) => q.eq(q.field("_id"), candidatePlayerId))
         .first();
+
+      if (!player && candidatePlayerId.includes("@")) {
+        player = await ctx.db
+          .query("players")
+          .withIndex("by_email", (q) => q.eq("email", candidatePlayerId!.toLowerCase().trim()))
+          .first();
+      }
+
       if (player) {
+        candidatePlayerId = player._id;
         playerScannedCodes = player.scannedCodeIds || [];
       }
     }
@@ -54,7 +65,7 @@ export const getCards = query({
     return cards.map((c) => {
       const hasScanned =
         playerScannedCodes.includes(c.code) ||
-        (args.playerId && (c.scannedBy || []).includes(args.playerId));
+        (candidatePlayerId && (c.scannedBy || []).includes(candidatePlayerId));
 
       return {
         ...c,

@@ -63,8 +63,8 @@ export const claimScan = mutation({
       };
     }
 
-    // 3. Anti-Bot / Anti-Rapid-Fire Rate Limiting (Minimum 4 secondes entre scans)
-    const SCAN_COOLDOWN_MS = 4000;
+    // 3. Anti-Bot / Anti-Rapid-Fire Rate Limiting (Minimum 2 secondes entre scans)
+    const SCAN_COOLDOWN_MS = 2000;
     if (player.lastScanAt && Date.now() - player.lastScanAt < SCAN_COOLDOWN_MS) {
       const remainingSec = Math.ceil((SCAN_COOLDOWN_MS - (Date.now() - player.lastScanAt)) / 1000);
       return {

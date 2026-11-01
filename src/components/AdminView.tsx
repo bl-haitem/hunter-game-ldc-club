@@ -939,6 +939,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
                   <button
                     onClick={() => {
+                      if (!displayCode || displayCode.includes('NEN-CIPHER-PROTECTED')) {
+                        sound.playError();
+                        alert("Session Administrateur expirée ou non synchronisée. Veuillez vous reconnecter au panel pour afficher les QR codes sécurisés.");
+                        return;
+                      }
                       sound.playClick();
                       setPreviewCard({ code: displayCode, title: c.title, points: c.points, rarity: c.cardRank });
                     }}

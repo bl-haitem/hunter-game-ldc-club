@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, Player, Rarity } from '../types/hxh';
 import { sound } from '../services/sound';
 
@@ -17,7 +17,25 @@ export const HintsView: React.FC<HintsViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
-  const scannedSet = useMemo(() => new Set(player.scannedCodeIds), [player.scannedCodeIds]);
+  const scannedSet = useMemo(() => new Set(player.scannedCodeIds || []), [player.scannedCodeIds]);
+
+  const isCardClaimedByPlayer = useCallback((card: Card): boolean => {
+    if (!card) return false;
+    // 1. Vérification par code si décrypté
+    if (card.code && card.code !== '🔒-NEN-CIPHER-PROTECTED' && scannedSet.has(card.code)) {
+      return true;
+    }
+    // 2. Vérification par ID candidat dans scannedBy
+    const scannedByList = card.scannedBy || [];
+    if (player.id && scannedByList.includes(player.id)) {
+      return true;
+    }
+    // 3. Vérification par email si disponible
+    if (player.email && scannedByList.includes(player.email)) {
+      return true;
+    }
+    return false;
+  }, [player.id, player.email, scannedSet]);
 
   // Counts
   const counts = useMemo(() => {
@@ -25,20 +43,20 @@ export const HintsView: React.FC<HintsViewProps> = ({
     let available = 0;
     let full = 0;
     cards.forEach(c => {
-      const isClaimed = scannedSet.has(c.code);
+      const isClaimed = isCardClaimedByPlayer(c);
       const isFull = (c.scannedBy || []).length >= c.maxScans;
       if (isClaimed) unlocked++;
       else if (isFull) full++;
       else available++;
     });
     return { all: cards.length, unlocked, available, full };
-  }, [cards, scannedSet]);
+  }, [cards, isCardClaimedByPlayer]);
 
   // Filtered cards
   const filteredCards = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return cards.filter(c => {
-      const isClaimed = scannedSet.has(c.code);
+      const isClaimed = isCardClaimedByPlayer(c);
       const isFull = (c.scannedBy || []).length >= c.maxScans;
 
       if (filter === 'unlocked' && !isClaimed) return false;
@@ -53,7 +71,7 @@ export const HintsView: React.FC<HintsViewProps> = ({
       }
       return true;
     });
-  }, [cards, filter, searchQuery, scannedSet]);
+  }, [cards, filter, searchQuery, isCardClaimedByPlayer]);
 
   const getRankBadgeClass = (rank: Rarity) => {
     switch (rank) {
@@ -154,7 +172,7 @@ export const HintsView: React.FC<HintsViewProps> = ({
           </div>
         ) : (
           filteredCards.map(c => {
-            const isClaimed = scannedSet.has(c.code);
+            const isClaimed = isCardClaimedByPlayer(c);
             const currentScans = (c.scannedBy || []).length;
             const isFull = currentScans >= c.maxScans;
             const slotsLeft = Math.max(0, c.maxScans - currentScans);
@@ -204,7 +222,7 @@ export const HintsView: React.FC<HintsViewProps> = ({
 
       {/* CARD DETAIL MODAL */}
       {selectedCard && (() => {
-        const isClaimed = scannedSet.has(selectedCard.code);
+        const isClaimed = isCardClaimedByPlayer(selectedCard);
         const currentScans = (selectedCard.scannedBy || []).length;
         const isFull = currentScans >= selectedCard.maxScans;
         const slotsLeft = Math.max(0, selectedCard.maxScans - currentScans);

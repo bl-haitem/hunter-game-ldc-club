@@ -73,7 +73,7 @@ export const App: React.FC = () => {
 
   // Sync with Convex database service on startup
   const syncDatabase = useCallback(async () => {
-    const loadedCards = await convexDb.getCards();
+    const loadedCards = await convexDb.getCards(player.id);
     const loadedPlayers = await convexDb.getAllPlayers();
     const loadedScans = await convexDb.getScans();
 
@@ -101,6 +101,11 @@ export const App: React.FC = () => {
   useEffect(() => {
     syncDatabase();
 
+    // Polling discret toutes les 10 secondes pour rafraîchir en direct les quotas et le classement
+    const liveInterval = setInterval(() => {
+      syncDatabase();
+    }, 10000);
+
     const checkHash = () => {
       if (window.location.hash === '#admin') {
         setCurrentTab('admin');
@@ -108,7 +113,10 @@ export const App: React.FC = () => {
     };
     checkHash();
     window.addEventListener('hashchange', checkHash);
-    return () => window.removeEventListener('hashchange', checkHash);
+    return () => {
+      clearInterval(liveInterval);
+      window.removeEventListener('hashchange', checkHash);
+    };
   }, [syncDatabase]);
 
   // Handle Official Registration / Login (Uses real owner name from Google or input)
@@ -185,7 +193,12 @@ export const App: React.FC = () => {
   };
 
   const handleLogout = () => {
+    // Purge de toutes les données du candidat précédent pour une nouvelle session propre
     localStorage.removeItem('hxh_player');
+    localStorage.removeItem('hunter_player_profile');
+    localStorage.removeItem('hunter_recent_scans');
+    localStorage.removeItem('hunter_claimed_cards');
+
     setPlayer({
       id: 'hunter_' + Date.now(),
       email: '',

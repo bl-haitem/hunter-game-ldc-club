@@ -369,11 +369,22 @@ export class ConvexDatabaseService {
   // --- CARDS & QUOTAS (PROTECTION ZERO-KNOWLEDGE) ---
   public async getCards(playerId?: string): Promise<Card[]> {
     const adminToken = this.adminSessionToken || sessionStorage.getItem('hxh_admin_token') || undefined;
+    let resolvedPlayerId = playerId && !playerId.startsWith('hunter_') && !playerId.startsWith('rival-') ? playerId : undefined;
+    if (!resolvedPlayerId) {
+      try {
+        const activeStr = localStorage.getItem('hxh_player');
+        if (activeStr) {
+          const parsed = JSON.parse(activeStr);
+          if (parsed.email) resolvedPlayerId = parsed.email;
+        }
+      } catch {}
+    }
+
     if (this.client) {
       try {
         const cloudCards: any = await this.client.query(api.cards.getCards, {
           adminToken,
-          playerId: playerId && !playerId.startsWith('hunter_') && !playerId.startsWith('rival-') ? playerId : undefined
+          playerId: resolvedPlayerId
         });
         if (Array.isArray(cloudCards) && cloudCards.length > 0) {
           const mapped: Card[] = cloudCards.map((c: any) => ({
