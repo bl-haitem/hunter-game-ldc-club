@@ -306,6 +306,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       setHint('');
       sound.playSuccess();
       showToast('Nouvelle carte Nen enregistrée avec succès !');
+      await refreshAdminCards();
     } catch (err: any) {
       alert(err?.message || 'Erreur lors de la création de la carte');
       sound.playError();

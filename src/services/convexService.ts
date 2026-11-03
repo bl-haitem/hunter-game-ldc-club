@@ -456,14 +456,16 @@ export class ConvexDatabaseService {
   public async adminCreateCard(
     cardData: Omit<Card, 'id' | 'scannedBy'>
   ): Promise<Card> {
-    if (!this.adminSessionToken) {
-      throw new Error('ACCÈS REFUSÉ : Session administrateur non active !');
+    const token = this.adminSessionToken || sessionStorage.getItem('hxh_admin_token') || '';
+    if (!token) {
+      throw new Error('ACCÈS REFUSÉ : Session administrateur non active ! Veuillez vous reconnecter.');
     }
+    this.adminSessionToken = token;
 
     if (this.client) {
       try {
         const newCloudCard: any = await this.client.mutation(api.cards.adminCreateCard, {
-          adminToken: this.adminSessionToken,
+          adminToken: token,
           code: cardData.code || undefined,
           title: cardData.title,
           cardRank: cardData.cardRank,
@@ -484,10 +486,22 @@ export class ConvexDatabaseService {
             hint: newCloudCard.hint,
             locationDesc: newCloudCard.locationDesc
           };
+
+          // Mettre à jour le cache local immédiatement
+          try {
+            const currentCached = await this.getCards();
+            const exists = currentCached.some(c => c.id === card.id || c.code === card.code);
+            if (!exists) {
+              currentCached.push(card);
+              localStorage.setItem('hxh_cards', JSON.stringify(currentCached));
+            }
+          } catch {}
+
           return card;
         }
-      } catch (err) {
-        console.warn('[Convex] Erreur adminCreateCard cloud :', err);
+      } catch (err: any) {
+        console.error('[Convex] Erreur adminCreateCard cloud :', err);
+        throw new Error(err?.data || err?.message || 'Échec de l\'enregistrement sur le serveur Cloud !');
       }
     }
 

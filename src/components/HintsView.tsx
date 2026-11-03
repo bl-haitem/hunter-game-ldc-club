@@ -97,7 +97,7 @@ export const HintsView: React.FC<HintsViewProps> = ({
   return (
     <div className="hints-page-layout">
       {/* Header & Progress bar */}
-      <div>
+      <div style={{ flexShrink: 0 }}>
         <div className="page-header" style={{ marginBottom: 6 }}>
           <h1>秘密の書 <em>GREED ISLAND</em></h1>
           <p>CLASSEUR OFFICIEL DE CARTES NEN — BY LDC CLUB</p>

@@ -722,16 +722,17 @@ html, body {
 
 .cards-list-container {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-right: 2px;
+  padding: 2px 4px 16px 2px;
   -webkit-overflow-scrolling: touch;
 }
 .cards-list-container::-webkit-scrollbar {
-  width: 3px;
+  width: 4px;
 }
 .cards-list-container::-webkit-scrollbar-track {
   background: rgba(0,0,0,0.2);
@@ -744,8 +745,10 @@ html, body {
 .hunter-card-row {
   background: var(--ink-card);
   border: 1px solid var(--border-glass);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-height: 60px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -761,14 +764,14 @@ html, body {
   box-shadow: 0 4px 14px rgba(0, 242, 254, 0.15);
 }
 .hunter-card-row.unlocked {
-  border-left: 3px solid var(--hunter-green);
+  border-left: 4px solid var(--hunter-green);
 }
 .hunter-card-row.quota-full {
-  border-left: 3px solid var(--hunter-danger);
-  opacity: 0.75;
+  border-left: 4px solid var(--hunter-danger);
+  opacity: 0.8;
 }
 .hunter-card-row.available {
-  border-left: 3px solid var(--hunter-cyan);
+  border-left: 4px solid var(--hunter-cyan);
 }
 
 .card-badge-col {
@@ -776,59 +779,70 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 38px;
+  min-width: 42px;
+  flex-shrink: 0;
 }
 .badge-rank {
   font-family: var(--font-code);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 3px 7px;
+  border-radius: 4px;
   letter-spacing: 0.5px;
+  line-height: 1.1;
 }
-.badge-ssr { background: rgba(251, 191, 36, 0.15); border: 1px solid var(--hunter-gold); color: var(--hunter-gold); }
-.badge-sr  { background: rgba(168, 85, 247, 0.15); border: 1px solid var(--hunter-purple); color: var(--hunter-purple); }
-.badge-r   { background: rgba(0, 242, 254, 0.15); border: 1px solid var(--hunter-cyan); color: var(--hunter-cyan); }
-.badge-n   { background: rgba(0, 240, 118, 0.15); border: 1px solid var(--hunter-green); color: var(--hunter-green); }
+.badge-ssr { background: rgba(251, 191, 36, 0.18); border: 1px solid var(--hunter-gold); color: var(--hunter-gold); }
+.badge-sr  { background: rgba(168, 85, 247, 0.18); border: 1px solid var(--hunter-purple); color: var(--hunter-purple); }
+.badge-r   { background: rgba(0, 242, 254, 0.18); border: 1px solid var(--hunter-cyan); color: var(--hunter-cyan); }
+.badge-n   { background: rgba(0, 240, 118, 0.18); border: 1px solid var(--hunter-green); color: var(--hunter-green); }
 
 .card-idx-num {
   font-family: var(--font-code);
-  font-size: 8px;
+  font-size: 9px;
   color: var(--ash);
   margin-top: 3px;
+  line-height: 1;
 }
 
 .card-info-col {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
 }
 .card-title-text {
   font-family: var(--font-jp);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-bottom: 3px;
+  line-height: 1.3;
 }
 .card-meta-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   font-family: var(--font-code);
-  font-size: 9px;
+  font-size: 10px;
+  line-height: 1.2;
 }
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 700;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 3px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 .status-claimed {
   background: rgba(0, 240, 118, 0.12);
@@ -849,6 +863,7 @@ html, body {
   color: var(--ash);
   font-size: 14px;
   padding-left: 4px;
+  flex-shrink: 0;
 }
 
 /* 3. CLASSEMENT VIEW */
